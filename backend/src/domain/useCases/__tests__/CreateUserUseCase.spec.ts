@@ -9,6 +9,7 @@ const mockUsersRepository: IUsersRepository = {
   create: vi.fn(),
   findByEmail: vi.fn(),
   findById: vi.fn(),
+  updatePassword: vi.fn(),
 };
 
 const mockHashProvider: IHashProvider = {

@@ -8,15 +8,18 @@ vi.mock('bcryptjs', () => ({
   compare: vi.fn(),
 }));
 
-// Mock jsonwebtoken
+// Mock jsonwebtoken (default export)
 vi.mock('jsonwebtoken', () => ({
-  sign: vi.fn().mockReturnValue('mocked_jwt_token'),
+  default: {
+    sign: vi.fn().mockReturnValue('mocked_jwt_token'),
+  },
 }));
 
 const mockUsersRepository: IUsersRepository = {
   create: vi.fn(),
   findByEmail: vi.fn(),
   findById: vi.fn(),
+  updatePassword: vi.fn(),
 };
 
 describe('AuthenticateUserUseCase', () => {
@@ -60,7 +63,7 @@ describe('AuthenticateUserUseCase', () => {
         email: 'nonexistent@example.com',
         password: '123456',
       })
-    ).rejects.toThrow('Email or password incorrect');
+    ).rejects.toThrow('E-mail ou senha incorretos');
   });
 
   it('should not authenticate with invalid password', async () => {
@@ -82,6 +85,6 @@ describe('AuthenticateUserUseCase', () => {
         email: 'john@example.com',
         password: 'wrong_password',
       })
-    ).rejects.toThrow('Email or password incorrect');
+    ).rejects.toThrow('E-mail ou senha incorretos');
   });
 });
