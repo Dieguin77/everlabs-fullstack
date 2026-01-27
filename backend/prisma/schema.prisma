@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  role  String  @default("user") // Pode ser "user" ou "admin"
+}
+model Task {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  data_inicio DateTime?
+  data_fim    DateTime?
+  prioridade  Int       @default(0) // de 0 a 10 [cite: 37]
+  status      String    @default("todo") // "todo", "inprogress", "done" etc. [cite: 38]
+
+  // Relação: Qual usuário é o "dono" (atribuído) desta tarefa?
+  userId      Int?      // O '?' torna opcional, nem toda tarefa precisa de um dono imediato
+  user        User?     @relation(fields: [userId], references: [id])
+
+  // Relação: Quais comentários esta tarefa possui?
+  comments    Comment[]
+
+  // Relação: Quais etiquetas esta tarefa possui?
+  tags        Tag[]
+}
+
+model Comment {
+  id     Int    @id @default(autoincrement())
+  text   String
+  
+  // Relação: A qual tarefa este comentário pertence?
+  taskId Int
+  task   Task   @relation(fields: [taskId], references: [id])
+}
+
+model Tag {
+  id     Int    @id @default(autoincrement())
+  label  String @unique // O nome da etiqueta (ex: "bug", "feature")
+
+  // Relação: Em quais tarefas esta etiqueta está?
+  tasks  Task[]
+}
