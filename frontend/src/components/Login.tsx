@@ -62,7 +62,7 @@ const Login: React.FC = () => {
         </form>
 
         <div className="login-footer">
-          <p>Everlabs - Desafio Técnico Full Stack</p>
+          <p>Batgo - Desenvolvido por <a href="https://diegodev.dev.br" target="_blank" rel="noopener noreferrer">Diego Batista</a></p>
         </div>
       </div>
     </div>

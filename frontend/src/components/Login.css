@@ -120,3 +120,15 @@
   color: #64748b;
   font-size: 12px;
 }
+
+.login-footer a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.login-footer a:hover {
+  color: #5b21b6;
+  text-decoration: underline;
+}
