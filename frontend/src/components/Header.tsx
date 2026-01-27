@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
 import { logout } from '../store/slices/authSlice';
+import ChangePasswordModal from './ChangePasswordModal';
 import './Header.css';
 
 const Header: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -28,12 +30,20 @@ const Header: React.FC = () => {
                 {user.role === 'ADMIN' ? '👑 Admin' : '👤 User'}
               </span>
             </div>
+            <button onClick={() => setIsPasswordModalOpen(true)} className="change-password-button">
+              🔐
+            </button>
             <button onClick={handleLogout} className="logout-button">
               Sair
             </button>
           </>
         )}
       </div>
+
+      <ChangePasswordModal 
+        isOpen={isPasswordModalOpen} 
+        onClose={() => setIsPasswordModalOpen(false)} 
+      />
     </header>
   );
 };

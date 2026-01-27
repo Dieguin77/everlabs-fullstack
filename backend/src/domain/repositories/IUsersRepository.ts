@@ -14,4 +14,5 @@ export interface IUsersRepository {
   create(data: CreateUserDTO): Promise<User>;
   findByEmail(email: string): Promise<User | null>;
   findById(id: number): Promise<User | null>;
+  updatePassword(id: number, password: string): Promise<void>;
 }

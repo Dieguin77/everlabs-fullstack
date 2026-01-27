@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,30 +15,26 @@ model User {
   role          String    @default("USER")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  assignedTasks Task[]    @relation("AssignedTasks")
   comments      Comment[]
   files         File[]
+  assignedTasks Task[]    @relation("AssignedTasks")
 }
 
 model Task {
-  id            Int        @id @default(autoincrement())
-  name          String
-  description   String?
-  startDate     DateTime
-  endDate       DateTime
-  priority      Int        @default(0) // 0 to 10
-  status        String     @default("TODO")
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  // Relations
-  assigneeId    Int?
-  assignee      User?      @relation("AssignedTasks", fields: [assigneeId], references: [id])
-  
-  comments      Comment[]
-  files         File[]
-  tags          TaskTag[]
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  priority    Int       @default(0)
+  status      String    @default("TODO")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  assigneeId  Int?
+  comments    Comment[]
+  files       File[]
+  assignee    User?     @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  tags        TaskTag[]
 
   @@index([assigneeId])
 }
@@ -50,28 +43,24 @@ model Comment {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-
-  // Relations
   taskId    Int
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id])
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@index([taskId])
   @@index([authorId])
 }
 
 model File {
-  id          Int      @id @default(autoincrement())
-  fileName    String
-  filePath    String
-  uploadedAt  DateTime @default(now())
-
-  // Relations
-  taskId      Int
-  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  uploaderId  Int
-  uploader    User     @relation(fields: [uploaderId], references: [id])
+  id         Int      @id @default(autoincrement())
+  fileName   String
+  filePath   String
+  uploadedAt DateTime @default(now())
+  taskId     Int
+  uploaderId Int
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@index([taskId])
   @@index([uploaderId])
@@ -83,12 +72,11 @@ model Tag {
   tasks TaskTag[]
 }
 
-// Explicit many-to-many relation table for Tasks and Tags
 model TaskTag {
   taskId Int
   tagId  Int
-  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@id([taskId, tagId])
 }

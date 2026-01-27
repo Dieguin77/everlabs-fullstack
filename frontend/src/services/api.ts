@@ -49,6 +49,12 @@ export const authApi = {
 
   getProfile: () =>
     request<{ data: User }>('/users/me'),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ status: string; message: string }>('/users/password', {
+      method: 'PUT',
+      body: { currentPassword, newPassword },
+    }),
 };
 
 // Tasks API

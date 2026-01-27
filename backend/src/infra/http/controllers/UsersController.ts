@@ -3,6 +3,7 @@ import { container } from 'tsyringe';
 
 import { CreateUserUseCase } from '@/domain/useCases/CreateUserUseCase';
 import { AuthenticateUserUseCase } from '@/domain/useCases/AuthenticateUserUseCase';
+import { ChangePasswordUseCase } from '@/domain/useCases/ChangePasswordUseCase';
 import { createUserBodySchema, authenticateUserSchema } from '../schemas/users.schemas';
 import { prisma } from '@/infra/database/prisma';
 
@@ -97,6 +98,31 @@ export class UsersController {
     return response.json({
       status: 'success',
       data: users
+    });
+  }
+
+  public async changePassword(request: Request, response: Response): Promise<Response> {
+    const { id } = request.user;
+    const { currentPassword, newPassword } = request.body;
+
+    if (!currentPassword || !newPassword) {
+      return response.status(400).json({
+        status: 'error',
+        message: 'Senha atual e nova senha são obrigatórias'
+      });
+    }
+
+    const changePasswordUseCase = container.resolve(ChangePasswordUseCase);
+
+    await changePasswordUseCase.execute({
+      userId: id,
+      currentPassword,
+      newPassword,
+    });
+
+    return response.json({
+      status: 'success',
+      message: 'Senha alterada com sucesso'
     });
   }
 }

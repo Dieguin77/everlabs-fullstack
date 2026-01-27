@@ -26,4 +26,9 @@ usersRouter.get('/me', ensureAuthenticated, usersController.getProfile);
 // @access  Admin only
 usersRouter.get('/', ensureAuthenticated, ensureAdmin, usersController.listAll);
 
+// @route   PUT /api/users/password
+// @desc    Change user password
+// @access  Private
+usersRouter.put('/password', ensureAuthenticated, usersController.changePassword);
+
 export { usersRouter };

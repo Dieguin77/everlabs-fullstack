@@ -7,8 +7,13 @@ export class PrismaTasksRepository implements ITasksRepository {
   async create(data: ICreateTaskDTO): Promise<ITask> {
     return prisma.task.create({
       data: {
-        ...data,
-        status: 'TODO'
+        name: data.name,
+        description: data.description,
+        priority: data.priority,
+        assigneeId: data.assigneeId,
+        status: 'TODO',
+        ...(data.startDate && { startDate: data.startDate }),
+        ...(data.endDate && { endDate: data.endDate }),
       }
     });
   }

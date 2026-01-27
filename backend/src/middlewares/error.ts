@@ -9,6 +9,9 @@ export function errorHandler(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) {
+  console.error('❌ Error:', error.message);
+  console.error('Stack:', error.stack);
+
   if (error instanceof AppError) {
     return response.status(error.statusCode).json({
       status: 'error',
@@ -23,8 +26,6 @@ export function errorHandler(
       issues: error.format(),
     });
   }
-
-  console.error(error); // Keep logging unexpected errors
 
   return response.status(500).json({
     status: 'error',
