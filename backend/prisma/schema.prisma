@@ -2,52 +2,93 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  role  String  @default("user") // Pode ser "user" ou "admin"
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String
+  password      String
+  role          String    @default("USER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignedTasks Task[]    @relation("AssignedTasks")
+  comments      Comment[]
+  files         File[]
 }
+
 model Task {
-  id          Int       @id @default(autoincrement())
-  nome        String
-  data_inicio DateTime?
-  data_fim    DateTime?
-  prioridade  Int       @default(0) // de 0 a 10 [cite: 37]
-  status      String    @default("todo") // "todo", "inprogress", "done" etc. [cite: 38]
+  id            Int        @id @default(autoincrement())
+  name          String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime
+  priority      Int        @default(0) // 0 to 10
+  status        String     @default("TODO")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  // Relação: Qual usuário é o "dono" (atribuído) desta tarefa?
-  userId      Int?      // O '?' torna opcional, nem toda tarefa precisa de um dono imediato
-  user        User?     @relation(fields: [userId], references: [id])
+  // Relations
+  assigneeId    Int?
+  assignee      User?      @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  
+  comments      Comment[]
+  files         File[]
+  tags          TaskTag[]
 
-  // Relação: Quais comentários esta tarefa possui?
-  comments    Comment[]
-
-  // Relação: Quais etiquetas esta tarefa possui?
-  tags        Tag[]
+  @@index([assigneeId])
 }
 
 model Comment {
-  id     Int    @id @default(autoincrement())
-  text   String
-  
-  // Relação: A qual tarefa este comentário pertence?
-  taskId Int
-  task   Task   @relation(fields: [taskId], references: [id])
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  taskId    Int
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@index([taskId])
+  @@index([authorId])
+}
+
+model File {
+  id          Int      @id @default(autoincrement())
+  fileName    String
+  filePath    String
+  uploadedAt  DateTime @default(now())
+
+  // Relations
+  taskId      Int
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploaderId  Int
+  uploader    User     @relation(fields: [uploaderId], references: [id])
+
+  @@index([taskId])
+  @@index([uploaderId])
 }
 
 model Tag {
-  id     Int    @id @default(autoincrement())
-  label  String @unique // O nome da etiqueta (ex: "bug", "feature")
+  id    Int       @id @default(autoincrement())
+  name  String    @unique
+  tasks TaskTag[]
+}
 
-  // Relação: Em quais tarefas esta etiqueta está?
-  tasks  Task[]
+// Explicit many-to-many relation table for Tasks and Tags
+model TaskTag {
+  taskId Int
+  tagId  Int
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
 }

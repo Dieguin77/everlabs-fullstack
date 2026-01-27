@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3333:3333"
+    environment:
+      - DATABASE_URL=file:./prisma/dev.db
+      - JWT_SECRET=everlabs-super-secret-jwt-key-2026
+      - JWT_EXPIRES_IN=7d
+      - PORT=3333
+    volumes:
+      - ./backend/prisma:/app/prisma
+      - ./backend/uploads:/app/uploads
+    networks:
+      - taskmanager-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:3333/api
+    networks:
+      - taskmanager-network
+
+networks:
+  taskmanager-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  uploads:
