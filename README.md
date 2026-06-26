@@ -1,230 +1,195 @@
-# 🚀 Task Manager - Sistema de Gestão de Tarefas Kanban
+<div align="center">
 
-Sistema fullstack de gestão de tarefas estilo SCRUM/Kanban desenvolvido como desafio técnico para a vaga de Estagiário Full Stack na **Everlabs**.
+# Task Manager — Kanban Board Fullstack
 
-![Task Manager](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![Node](https://img.shields.io/badge/node-20+-green.svg)
-![React](https://img.shields.io/badge/react-18+-61DAFB.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5+-3178C6.svg)
+**Sistema completo de gestão de tarefas com quadro Kanban, autenticação JWT, upload de arquivos e arquitetura limpa.**
 
-## 📋 Índice
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com/)
+[![Swagger](https://img.shields.io/badge/Swagger-API_Docs-85EA2D?style=flat-square&logo=swagger&logoColor=black)](https://swagger.io/)
 
-- [Funcionalidades](#-funcionalidades)
-- [Tecnologias](#-tecnologias)
-- [Arquitetura](#-arquitetura)
-- [Instalação](#-instalação)
-- [Executando com Docker](#-executando-com-docker)
-- [Documentação da API](#-documentação-da-api)
-- [Testes](#-testes)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
+</div>
 
-## ✨ Funcionalidades
+---
 
-### Usuários
-- ✅ Autenticação JWT (login/logout)
-- ✅ Dois perfis: **Admin** e **User**
-- ✅ Cadastro de usuários via API
+## Sobre o projeto
 
-### Tarefas
-- ✅ CRUD completo de tarefas (Admin)
-- ✅ Quadro Kanban com drag-and-drop
-- ✅ Status: TODO, IN_PROGRESS, REVIEW, DONE
-- ✅ Prioridade de 0 a 10
-- ✅ Atribuição de responsáveis
-- ✅ Datas de início e fim
+Aplicação fullstack de gerenciamento de tarefas no estilo Kanban/SCRUM. O projeto foi construído com foco em boas práticas de engenharia: **Clean Architecture**, **SOLID**, **injeção de dependências** e **testes unitários** — tanto no backend quanto no frontend.
 
-### Interações
-- ✅ Comentários/ocorrências
-- ✅ Upload de arquivos (anexos)
-- ✅ Sistema de tags/etiquetas
+O backend expõe uma API RESTful documentada com Swagger, e o frontend consome essa API com gerenciamento de estado via Redux Toolkit. Todo o ambiente roda com um único comando via Docker Compose.
+
+---
+
+## Funcionalidades
+
+### Autenticação e Perfis
+- Login e logout com **JWT**
+- Dois perfis de acesso: **Admin** e **User**
+- Middleware de autorização baseado em roles
+
+### Gestão de Tarefas (Admin)
+- CRUD completo de tarefas
+- Atribuição de responsáveis, prioridade (0–10) e datas
+- Sistema de **tags/etiquetas**
+- Upload de **arquivos anexos**
+
+### Quadro Kanban (User)
+- Drag-and-drop nativo (sem dependência externa) entre colunas
+- Status: `TODO` → `IN_PROGRESS` → `REVIEW` → `DONE`
+- Comentários e ocorrências por tarefa
 
 ### Permissões
+
 | Ação | Admin | User |
-|------|-------|------|
-| Criar tarefas | ✅ | ❌ |
-| Editar tarefas | ✅ | ❌ |
-| Excluir tarefas | ✅ | ❌ |
+|------|:-----:|:----:|
+| Criar/editar/excluir tarefas | ✅ | ❌ |
 | Atualizar status | ✅ | ✅ (próprias) |
 | Adicionar comentários | ✅ | ✅ (próprias) |
 | Upload de arquivos | ✅ | ✅ (próprias) |
 
-## 🛠 Tecnologias
+---
+
+## Stack tecnológica
 
 ### Backend
-- **Node.js** + **Express** - Runtime e framework web
-- **TypeScript** - Tipagem estática
-- **Prisma ORM** - ORM para banco de dados
-- **SQLite** - Banco de dados
-- **JWT** - Autenticação
-- **Zod** - Validação de schemas
-- **TSyringe** - Injeção de dependências
-- **Vitest** - Testes unitários
-- **Swagger** - Documentação da API
+| Tecnologia | Uso |
+|-----------|-----|
+| Node.js + Express | Runtime e framework HTTP |
+| TypeScript | Tipagem estática em todo o projeto |
+| Prisma ORM | Acesso ao banco de dados com type-safety |
+| SQLite | Banco de dados (facilmente substituível) |
+| JWT | Autenticação stateless |
+| Zod | Validação de schemas na camada HTTP |
+| TSyringe | Injeção de dependências (IoC container) |
+| Vitest | Testes unitários |
+| Swagger/OpenAPI | Documentação interativa da API |
 
 ### Frontend
-- **React 18** - Biblioteca UI
-- **TypeScript** - Tipagem estática
-- **Redux Toolkit** - Gerenciamento de estado
-- **Vite** - Build tool
-- **CSS Modules** - Estilização
+| Tecnologia | Uso |
+|-----------|-----|
+| React 18 | Biblioteca de interface |
+| TypeScript | Tipagem de componentes, hooks e store |
+| Redux Toolkit | Gerenciamento de estado global |
+| Vite | Build tool e dev server |
+| CSS Modules | Estilização com escopo local |
 
 ### DevOps
-- **Docker** + **Docker Compose** - Containerização
-- **Nginx** - Servidor web para frontend
+| Tecnologia | Uso |
+|-----------|-----|
+| Docker + Docker Compose | Containerização de backend e frontend |
+| Nginx | Serve o build do React em produção |
 
-## 🏗 Arquitetura
+---
 
-O projeto segue os princípios de **Clean Architecture** e **SOLID**:
+## Arquitetura
+
+O backend segue **Clean Architecture**, separando regras de negócio de detalhes de infraestrutura:
 
 ```
 backend/src/
-├── domain/           # Regras de negócio (entities, use cases)
-│   ├── entities/     # Interfaces e tipos
-│   ├── providers/    # Contratos de providers
-│   ├── repositories/ # Contratos de repositórios
-│   └── useCases/     # Casos de uso da aplicação
-├── infra/            # Implementações concretas
-│   ├── database/     # Prisma repositories
-│   ├── http/         # Controllers, routes, middlewares
-│   └── providers/    # Implementações de providers
-└── shared/           # Código compartilhado
-    ├── container/    # Injeção de dependências
-    └── errors/       # Tratamento de erros
+├── domain/               # Núcleo da aplicação — sem dependências externas
+│   ├── entities/         # Interfaces e tipos de domínio
+│   ├── repositories/     # Contratos (interfaces) de acesso a dados
+│   ├── providers/        # Contratos de serviços externos
+│   └── useCases/         # Casos de uso: lógica de negócio pura
+│
+├── infra/                # Implementações concretas
+│   ├── database/         # Repositórios Prisma (implementam domain/repositories)
+│   ├── http/             # Controllers, rotas, middlewares
+│   └── providers/        # Serviços: upload de arquivos, hash, etc.
+│
+└── shared/
+    ├── container/        # Registro de dependências (TSyringe)
+    └── errors/           # Classes de erro padronizadas
 ```
 
-## 🚀 Instalação
+Esse modelo permite, por exemplo, **trocar SQLite por PostgreSQL** apenas substituindo a implementação do repositório, sem tocar nos casos de uso.
 
-### Pré-requisitos
-- Node.js 20+
-- npm ou yarn
+---
 
-### Backend
+## Como rodar
 
-```bash
-# Entrar na pasta do backend
-cd backend
-
-# Instalar dependências
-npm install
-
-# Criar arquivo .env
-cp .env.example .env
-
-# Executar migrations do Prisma
-npx prisma migrate dev
-
-# Iniciar servidor de desenvolvimento
-npm run dev
-```
-
-O servidor estará disponível em `http://localhost:3333`
-
-### Frontend
+### Com Docker (recomendado)
 
 ```bash
-# Entrar na pasta do frontend
-cd frontend
-
-# Instalar dependências
-npm install
-
-# Criar arquivo .env
-cp .env.example .env
-
-# Iniciar servidor de desenvolvimento
-npm run dev
-```
-
-O frontend estará disponível em `http://localhost:5173`
-
-## 🐳 Executando com Docker
-
-```bash
-# Na raiz do projeto
+git clone https://github.com/Dieguin77/Projeto-everlabs-fullstack.git
+cd Projeto-everlabs-fullstack
 docker-compose up --build
 ```
 
-Serviços disponíveis:
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3333
-- **Swagger Docs**: http://localhost:3333/api-docs
+| Serviço | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:3333 |
+| Swagger Docs | http://localhost:3333/api-docs |
 
-## 📚 Documentação da API
+### Localmente
 
-A documentação interativa da API está disponível via Swagger:
-
-```
-http://localhost:3333/api-docs
-```
-
-### Principais Endpoints
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/api/users` | Criar usuário |
-| POST | `/api/users/authenticate` | Login |
-| GET | `/api/users/me` | Perfil do usuário |
-| GET | `/api/tasks` | Listar tarefas |
-| POST | `/api/tasks` | Criar tarefa (Admin) |
-| PATCH | `/api/tasks/:id/status` | Atualizar status |
-| POST | `/api/tasks/:taskId/comments` | Adicionar comentário |
-| POST | `/api/files/tasks/:taskId` | Upload de arquivo |
-| GET | `/api/tags` | Listar tags |
-
-### Autenticação
-
-Todas as rotas protegidas requerem o header:
-```
-Authorization: Bearer <seu_token_jwt>
+**Backend:**
+```bash
+cd backend
+npm install
+cp .env.example .env
+npx prisma migrate dev
+npm run dev
 ```
 
-## 🧪 Testes
+**Frontend:**
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+---
+
+## API — Principais endpoints
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/users` | Criar usuário |
+| `POST` | `/api/users/authenticate` | Login (retorna JWT) |
+| `GET` | `/api/users/me` | Perfil autenticado |
+| `GET` | `/api/tasks` | Listar tarefas |
+| `POST` | `/api/tasks` | Criar tarefa (Admin) |
+| `PATCH` | `/api/tasks/:id/status` | Atualizar status |
+| `POST` | `/api/tasks/:id/comments` | Adicionar comentário |
+| `POST` | `/api/files/tasks/:id` | Upload de arquivo |
+| `GET` | `/api/tags` | Listar tags |
+
+Todas as rotas protegidas exigem o header:
+```
+Authorization: Bearer <token>
+```
+
+A documentação completa e interativa está disponível no Swagger em `http://localhost:3333/api-docs`.
+
+---
+
+## Testes
 
 ```bash
-# Executar testes
 cd backend
+
+# Rodar todos os testes
 npm test
 
-# Executar testes com coverage
+# Com relatório de cobertura
 npm run test:coverage
 
-# Executar testes em modo watch
+# Modo watch
 npm run test:watch
 ```
 
-## 📁 Estrutura do Projeto
+---
 
-```
-Projeto-everlabs-fullstack/
-├── backend/
-│   ├── src/
-│   │   ├── domain/
-│   │   │   ├── entities/
-│   │   │   ├── providers/
-│   │   │   ├── repositories/
-│   │   │   └── useCases/
-│   │   ├── infra/
-│   │   │   ├── database/
-│   │   │   ├── http/
-│   │   │   └── providers/
-│   │   └── shared/
-│   ├── prisma/
-│   ├── Dockerfile
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── services/
-│   │   └── store/
-│   ├── Dockerfile
-│   └── package.json
-├── docker-compose.yml
-└── README.md
-```
+## Variáveis de ambiente
 
-## 🔐 Variáveis de Ambiente
-
-### Backend (.env)
+**Backend** (`backend/.env`):
 ```env
 DATABASE_URL="file:./dev.db"
 JWT_SECRET="sua-chave-secreta"
@@ -232,42 +197,44 @@ JWT_EXPIRES_IN="7d"
 PORT=3333
 ```
 
-### Frontend (.env)
+**Frontend** (`frontend/.env`):
 ```env
 VITE_API_URL=http://localhost:3333/api
 ```
 
-## 👤 Criando Usuário Admin
+---
 
-Para criar o primeiro usuário admin, faça uma requisição POST:
+## Criando o primeiro usuário Admin
 
 ```bash
 curl -X POST http://localhost:3333/api/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Admin",
-    "email": "admin@everlabs.com",
+    "email": "admin@exemplo.com",
     "password": "123456",
     "role": "ADMIN"
   }'
 ```
 
-## 🎯 Decisões Técnicas
+---
 
-1. **Clean Architecture**: Separação clara entre regras de negócio e detalhes de implementação, facilitando testes e manutenção.
+## Decisões técnicas
 
-2. **TSyringe para DI**: Inversão de dependência permite trocar implementações facilmente (ex: trocar SQLite por PostgreSQL).
+**Clean Architecture** — A separação entre `domain` e `infra` mantém os casos de uso independentes de banco de dados, framework e qualquer detalhe externo. Isso facilita testes e evolução do sistema.
 
-3. **Redux Toolkit**: Gerenciamento de estado previsível e escalável no frontend.
+**TSyringe (IoC Container)** — A inversão de controle permite injetar implementações concretas nos casos de uso sem acoplamento. Trocar a implementação de um repositório ou provider não exige alterar nenhuma regra de negócio.
 
-4. **Drag and Drop nativo**: Implementação sem bibliotecas externas para melhor controle e menor bundle size.
+**Redux Toolkit** — Escolhido pela previsibilidade e ferramentas de debug (Redux DevTools). Para o volume de estado desse projeto, o RTK Query simplificou o cache das requisições.
 
-5. **SQLite**: Escolhido pela simplicidade para desenvolvimento e demonstração, facilmente substituível por PostgreSQL/MySQL em produção.
+**Drag-and-drop nativo** — Implementado com a API HTML5 Drag and Drop, sem bibliotecas externas. Reduz bundle size e dá controle total sobre o comportamento.
 
-## 📝 Licença
-
-Este projeto foi desenvolvido como parte do desafio técnico para a vaga de Estagiário Full Stack na Everlabs.
+**SQLite** — Escolhido para facilitar o setup local e a demonstração. A arquitetura permite substituição por PostgreSQL ou MySQL apenas na camada de repositório.
 
 ---
 
-Desenvolvido com 💜 para o desafio Everlabs
+<div align="center">
+
+Desenvolvido por **[Diego Batista](https://github.com/Dieguin77)**
+
+</div>
