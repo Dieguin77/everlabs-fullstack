@@ -115,8 +115,8 @@ Esse modelo permite, por exemplo, **trocar SQLite por PostgreSQL** apenas substi
 ### Com Docker (recomendado)
 
 ```bash
-git clone https://github.com/Dieguin77/Projeto-everlabs-fullstack.git
-cd Projeto-everlabs-fullstack
+git clone https://github.com/Dieguin77/everlabs-fullstack.git
+cd everlabs-fullstack
 docker-compose up --build
 ```
 
