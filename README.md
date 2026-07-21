@@ -15,6 +15,21 @@
 
 ---
 
+## 🔗 Demo ao vivo
+
+**App:** https://everlabs-fullstack.vercel.app
+**API:** https://everlabs-fullstack-api.onrender.com/api-docs
+
+**Login de demonstração:**
+```
+Email: admin@demo.com
+Senha: demo12345
+```
+
+> ⚠️ Hospedado em planos gratuitos: a API "dorme" após 15 min de inatividade — a primeira requisição pode levar 30–50s para acordar. Arquivos anexados em tarefas não persistem entre deploys (disco efêmero do free tier).
+
+---
+
 ## Sobre o projeto
 
 Aplicação fullstack de gerenciamento de tarefas no estilo Kanban/SCRUM. O projeto foi construído com foco em boas práticas de engenharia: **Clean Architecture**, **SOLID**, **injeção de dependências** e **testes unitários** — tanto no backend quanto no frontend.
@@ -60,7 +75,7 @@ O backend expõe uma API RESTful documentada com Swagger, e o frontend consome e
 | Node.js + Express | Runtime e framework HTTP |
 | TypeScript | Tipagem estática em todo o projeto |
 | Prisma ORM | Acesso ao banco de dados com type-safety |
-| SQLite | Banco de dados (facilmente substituível) |
+| PostgreSQL | Banco de dados relacional |
 | JWT | Autenticação stateless |
 | Zod | Validação de schemas na camada HTTP |
 | TSyringe | Injeção de dependências (IoC container) |
@@ -106,7 +121,7 @@ backend/src/
     └── errors/           # Classes de erro padronizadas
 ```
 
-Esse modelo permite, por exemplo, **trocar SQLite por PostgreSQL** apenas substituindo a implementação do repositório, sem tocar nos casos de uso.
+Esse modelo permite, por exemplo, **trocar o banco de dados** (feito com PostgreSQL) apenas substituindo a implementação do repositório, sem tocar nos casos de uso.
 
 ---
 
@@ -128,12 +143,15 @@ docker-compose up --build
 
 ### Localmente
 
+Requer um PostgreSQL rodando (local, Docker avulso, ou uma instância gratuita no Supabase/Neon).
+
 **Backend:**
 ```bash
 cd backend
 npm install
-cp .env.example .env
+cp .env.example .env   # ajuste DATABASE_URL para seu Postgres
 npx prisma migrate dev
+npx prisma db seed     # cria o usuário admin@demo.com / demo12345
 npm run dev
 ```
 
@@ -191,7 +209,7 @@ npm run test:watch
 
 **Backend** (`backend/.env`):
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/everlabs?schema=public"
 JWT_SECRET="sua-chave-secreta"
 JWT_EXPIRES_IN="7d"
 PORT=3333
@@ -205,6 +223,15 @@ VITE_API_URL=http://localhost:3333/api
 ---
 
 ## Criando o primeiro usuário Admin
+
+O jeito mais simples é rodar o seed, que cria `admin@demo.com` / `demo12345`:
+
+```bash
+cd backend
+npx prisma db seed
+```
+
+Ou criar um usuário próprio via API:
 
 ```bash
 curl -X POST http://localhost:3333/api/users \
@@ -229,7 +256,7 @@ curl -X POST http://localhost:3333/api/users \
 
 **Drag-and-drop nativo** — Implementado com a API HTML5 Drag and Drop, sem bibliotecas externas. Reduz bundle size e dá controle total sobre o comportamento.
 
-**SQLite** — Escolhido para facilitar o setup local e a demonstração. A arquitetura permite substituição por PostgreSQL ou MySQL apenas na camada de repositório.
+**PostgreSQL** — Usado tanto localmente (via Docker Compose) quanto em produção, para manter paridade entre ambientes. A Clean Architecture torna a troca de banco (ex.: MySQL) uma mudança isolada na camada de repositório.
 
 ---
 

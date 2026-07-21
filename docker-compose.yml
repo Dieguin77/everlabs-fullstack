@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=everlabs
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taskmanager-network
+
   backend:
     build:
       context: ./backend
@@ -8,12 +26,15 @@ services:
     ports:
       - "3333:3333"
     environment:
-      - DATABASE_URL=file:./prisma/dev.db
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/everlabs?schema=public
+      - DIRECT_URL=postgresql://postgres:postgres@db:5432/everlabs?schema=public
       - JWT_SECRET=everlabs-super-secret-jwt-key-2026
       - JWT_EXPIRES_IN=7d
       - PORT=3333
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
-      - ./backend/prisma:/app/prisma
       - ./backend/uploads:/app/uploads
     networks:
       - taskmanager-network

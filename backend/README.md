@@ -6,7 +6,7 @@ Backend da aplicação de gerenciamento de tarefas estilo SCRUM/Kanban.
 
 - Node.js com TypeScript
 - Express.js para API RESTful
-- Prisma ORM com SQLite
+- Prisma ORM com PostgreSQL
 - JWT para autenticação
 - Clean Architecture
 - SOLID principles
@@ -71,14 +71,10 @@ A documentação da API está disponível em `/api-docs` quando o servidor estiv
 
 ## Docker
 
-Para rodar o projeto com Docker:
+Este backend depende de um PostgreSQL — use o `docker-compose.yml` na raiz do projeto (sobe backend + banco juntos) em vez de rodar a imagem isolada:
 
 ```bash
-# Build da imagem
-docker build -t task-manager-api .
-
-# Executar o container
-docker run -p 3333:3333 task-manager-api
+docker-compose up --build
 ```
 
 ## Licença
