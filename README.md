@@ -18,7 +18,7 @@
 ## 🔗 Demo ao vivo
 
 **App:** https://everlabs-fullstack.vercel.app
-**API:** https://everlabs-fullstack-api.onrender.com/api-docs
+**API:** https://everlabs-fullstack.onrender.com/api-docs
 
 **Login de demonstração:**
 ```
