@@ -3,7 +3,9 @@ export const swaggerSpec = {
   info: {
     title: 'Task Management API - Everlabs',
     version: '1.0.0',
-    description: 'API RESTful para Sistema de Gestão de Tarefas estilo SCRUM/Kanban',
+    description:
+      'API RESTful para Sistema de Gestão de Tarefas estilo SCRUM/Kanban. ' +
+      'Quando o banco de dados está indisponível, as rotas que dependem dele respondem 503 com uma mensagem clara.',
     contact: {
       name: 'Everlabs',
       email: 'tecnico@everlabs.com.br'
@@ -11,8 +13,12 @@ export const swaggerSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:3333/api',
-      description: 'Servidor de Desenvolvimento'
+      // Relative URL: the browser resolves it against the page that serves this documentation,
+      // so "Try it out" calls the same server in development and in production. It used to be
+      // http://localhost:3333/api, which made "Try it out" on the live docs call the visitor's
+      // own computer.
+      url: '/api',
+      description: 'Este servidor (o mesmo endereço desta página)'
     }
   ],
   tags: [
@@ -20,7 +26,8 @@ export const swaggerSpec = {
     { name: 'Tasks', description: 'Gerenciamento de tarefas' },
     { name: 'Comments', description: 'Comentários/ocorrências nas tarefas' },
     { name: 'Files', description: 'Upload e gerenciamento de arquivos' },
-    { name: 'Tags', description: 'Etiquetas para categorização de tarefas' }
+    { name: 'Tags', description: 'Etiquetas para categorização de tarefas' },
+    { name: 'Health', description: 'Verificação de saúde do servidor (ficam na raiz, fora do prefixo /api)' }
   ],
   components: {
     securitySchemes: {
@@ -434,6 +441,76 @@ export const swaggerSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'taskId', in: 'path', required: true, schema: { type: 'integer' } }],
         responses: { '200': { description: 'Lista de tags da tarefa' } }
+      }
+    },
+    '/health': {
+      // The health checks live at the server root, not under /api.
+      servers: [{ url: '/', description: 'Raiz do servidor' }],
+      get: {
+        tags: ['Health'],
+        summary: 'Servidor no ar',
+        description:
+          'Não consulta o banco de dados, então responde na hora mesmo com o banco fora do ar. ' +
+          'Serve para acordar o servidor gratuito (que dorme após 15 minutos sem acesso) e como verificação de saúde da plataforma.',
+        responses: {
+          '200': {
+            description: 'Processo no ar',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: { type: 'string', example: 'ok' },
+                    uptimeSeconds: { type: 'integer', example: 120, description: 'Há quantos segundos o processo está no ar' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/health/db': {
+      servers: [{ url: '/', description: 'Raiz do servidor' }],
+      get: {
+        tags: ['Health'],
+        summary: 'Banco de dados responde',
+        description:
+          'Executa um SELECT 1 e espera no máximo 3 segundos. Use para saber se o banco de dados está acessível ' +
+          '(por exemplo, se o projeto gratuito do Supabase foi pausado por inatividade).',
+        responses: {
+          '200': {
+            description: 'O banco respondeu a tempo',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: { type: 'string', example: 'ok' },
+                    database: { type: 'string', example: 'up' },
+                    latencyMs: { type: 'integer', example: 12, description: 'Tempo da consulta, em milissegundos' }
+                  }
+                }
+              }
+            }
+          },
+          '503': {
+            description: 'O banco está fora do ar ou demorou demais para responder',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: { type: 'string', example: 'error' },
+                    database: { type: 'string', example: 'down' },
+                    reason: { type: 'string', enum: ['timeout', 'unreachable'], example: 'timeout' },
+                    latencyMs: { type: 'integer', example: 3002 }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

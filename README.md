@@ -219,6 +219,14 @@ npm run test:coverage
 npm run test:watch
 ```
 
+**Frontend** (não há testes automatizados; as verificações são o lint e o build):
+
+```bash
+cd frontend
+npm run lint    # ESLint com a configuração padrão do Vite + React + TypeScript
+npm run build   # checagem de tipos (tsc) e build de produção
+```
+
 ---
 
 ## Variáveis de ambiente
