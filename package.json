@@ -1,0 +1,12 @@
+{
+  "name": "everlabs-fullstack",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Everlabs Task Manager. Backend e frontend têm cada um o seu package.json; este arquivo só expõe utilitários do repositório.",
+  "scripts": {
+    "check:demo": "node scripts/check-demo.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
