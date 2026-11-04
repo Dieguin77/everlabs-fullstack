@@ -50,12 +50,13 @@ const SAMPLE_TASKS = [
     description: 'Incluir /health e /health/db na documentação interativa em /api-docs (hoje eles só estão descritos no README).',
     priority: 3, status: 'TODO', start: 3, end: 10, tags: ['Docs'], comments: [],
   },
-  // ---- Em andamento (IN_PROGRESS)
+  // ---- Em andamento (IN_PROGRESS): nada no momento; a validação a frio já terminou (card abaixo)
   {
     name: 'Validar a partida a frio com a versão nova',
     description:
       'Deixar o backend gratuito dormir por mais de 15 minutos e medir o tempo até a primeira resposta de /health e do login (meta: até 90 s a frio e menos de 2 s a quente).',
-    priority: 6, status: 'IN_PROGRESS', start: 0, end: 1, tags: ['DevOps', 'Testes'], comments: [],
+    priority: 6, status: 'DONE', start: -1, end: 0, tags: ['DevOps', 'Testes'],
+    comments: ['Medido em 04/11/2026: /health respondeu em 11,8 s depois de 17 min sem acesso (meta: até 90 s) e em 0,8 s a quente; login a quente em 1,0 s.'],
   },
   // ---- Em revisão (REVIEW)
   {
