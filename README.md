@@ -26,7 +26,21 @@ Email: admin@demo.com
 Senha: demo12345
 ```
 
-> ⚠️ Hospedado em planos gratuitos: a API "dorme" após 15 min de inatividade — a primeira requisição pode levar 30–50s para acordar. Arquivos anexados em tarefas não persistem entre deploys (disco efêmero do free tier).
+> ⚠️ Hospedado em planos gratuitos: a API "dorme" após 15 min de inatividade e a primeira requisição pode levar **até cerca de 1 minuto** para acordar. O app dispara um aquecimento ao abrir e, no login, mostra um aviso ("servidor acordando") e tenta de novo sozinho por até ~90 s. Arquivos anexados em tarefas não persistem entre deploys (disco efêmero do free tier).
+
+[![Verificação diária da demo](https://github.com/Dieguin77/everlabs-fullstack/actions/workflows/keep-alive.yml/badge.svg)](https://github.com/Dieguin77/everlabs-fullstack/actions/workflows/keep-alive.yml)
+
+**Última verificação manual:** 04/11/2026 — ❌ backend sem resposta (banco do Supabase inativo); frontend no ar. Atualize esta linha depois de restaurar o banco e rodar o comando abaixo.
+
+**Verificar a demo de ponta a ponta** (acorda o backend, testa o banco, faz login com a conta demo e confere o site; precisa de Node 18+, sem instalar nada):
+
+```bash
+npm run check:demo
+```
+
+O `check:demo` termina com código 0 se tudo funciona e 1 se algo falha, e diz qual etapa quebrou. Um workflow do GitHub Actions ([`keep-alive.yml`](.github/workflows/keep-alive.yml)) roda a mesma verificação todos os dias; isso também gera atividade no banco, o que evita a pausa do projeto gratuito do Supabase.
+
+**Popular o quadro da demo** com tarefas de exemplo (usa a API do próprio app, só cria o que falta e nunca duplica): `npm run seed:demo`. Com `-- --dry-run` mostra o plano sem gravar nada, e com `-- --remove` apaga só as tarefas de exemplo.
 
 ---
 
@@ -178,6 +192,8 @@ npm run dev
 | `POST` | `/api/tasks/:id/comments` | Adicionar comentário |
 | `POST` | `/api/files/tasks/:id` | Upload de arquivo |
 | `GET` | `/api/tags` | Listar tags |
+| `GET` | `/health` | Processo no ar (não toca no banco; usado para acordar o servidor) |
+| `GET` | `/health/db` | `200` se o banco responde, `503` se está fora ou lento |
 
 Todas as rotas protegidas exigem o header:
 ```
@@ -210,15 +226,36 @@ npm run test:watch
 **Backend** (`backend/.env`):
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/everlabs?schema=public"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/everlabs?schema=public"
 JWT_SECRET="sua-chave-secreta"
 JWT_EXPIRES_IN="7d"
 PORT=3333
 ```
 
+Em produção (Supabase), `DATABASE_URL` usa o pooler na porta 6543 e `DIRECT_URL` o pooler em modo sessão na porta 5432 (as migrations usam esta). Se a URL não trouxer `connect_timeout`, `pool_timeout` ou `connection_limit`, o backend aplica valores que fazem falhar rápido (8 s, 8 s e 5 conexões) e liga `pgbouncer=true` na porta 6543. Valores presentes na URL sempre prevalecem.
+
 **Frontend** (`frontend/.env`):
 ```env
 VITE_API_URL=http://localhost:3333/api
 ```
+
+---
+
+## Solução de problemas (demo ao vivo)
+
+Comece por `npm run check:demo`: ele mostra qual etapa falha.
+
+| Sintoma | Causa provável | O que fazer |
+|---------|----------------|-------------|
+| Primeiro acesso demora até ~1 min | O Render gratuito dormiu | Normal. O app avisa e tenta de novo sozinho. |
+| `/health` responde, mas `/health/db` e o login devolvem `503` | Banco inacessível: projeto **Supabase pausado** (o plano gratuito pausa após 7 dias com pouca atividade) ou `DATABASE_URL`/`DIRECT_URL` incorretas | No painel do Supabase, restaure o projeto (**Restore project**) e confira as strings de conexão do pooler. Depois reinicie o serviço no Render. |
+| Nada responde por mais de 1–2 min, nem `/health` | Serviço do Render suspenso, com deploy falho ou sem horas gratuitas (750 h/mês por workspace) | No painel do Render, veja **Events** e **Logs** e faça **Manual Deploy**. |
+| Logs com `P1001` ou `tenant/user not found` | O Prisma não alcança o banco (projeto pausado ou removido, ou URL errada) | Mesma correção da linha do banco. |
+| Login devolve `401` | A conta demo não existe no banco | O seed roda em segundo plano a cada inicialização; reinicie o serviço ou rode `npx prisma db seed` com a `DIRECT_URL` correta. |
+
+**Caso de 04/11/2026.** O backend parou de responder: o domínio do projeto Supabase não resolvia e o pooler devolvia `tenant/user not found` (compatível com projeto pausado por inatividade). Como o contêiner rodava `prisma migrate deploy` antes de iniciar o servidor, a porta nunca abria e toda requisição ficava sem resposta. Agora o servidor abre a porta imediatamente e roda migrations e seed em segundo plano; com o banco fora, a API responde `503` com mensagem clara em poucos segundos em vez de travar.
+
+**Prevenção.** O workflow diário `keep-alive.yml` gera atividade no banco. O GitHub desativa workflows agendados de repositórios públicos após 60 dias sem atividade no repositório: se isso acontecer, ative-o de novo em **Actions → Keep demo alive → Enable workflow** (ou `gh workflow enable keep-alive.yml`). Qualquer commit reinicia a contagem.
 
 ---
 

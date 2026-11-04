@@ -1,0 +1,27 @@
+# Documentation of the backend service on Render (free plan).
+#
+# This file is NOT applied automatically: the live service was created in the dashboard.
+# It records how the service is meant to be configured. Values were written from the repo,
+# not read from the dashboard, so compare them with the dashboard before creating a
+# Blueprint from it.
+services:
+  - type: web
+    name: everlabs-fullstack
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # /health never touches the database, so the platform can tell "process is up"
+    # apart from "database is down" (see /health/db).
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Secrets: set them in the Render dashboard, never in this file.
+      - key: DATABASE_URL # Supabase pooler, port 6543, with pgbouncer=true
+        sync: false
+      - key: DIRECT_URL # Supabase pooler (session mode), port 5432, used by migrations
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d

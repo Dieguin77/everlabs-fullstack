@@ -29,7 +29,7 @@ export interface IComment {
   taskId: number;
   userId: number;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date; // the Comment table has no updatedAt column
 }
 
 export interface IFile {

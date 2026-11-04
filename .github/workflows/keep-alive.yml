@@ -1,0 +1,38 @@
+name: Keep demo alive
+
+# Once a day: wakes the free-tier backend, makes a real database read (demo login) and
+# checks the site. This keeps the Supabase free project from being paused after 7 days
+# without activity, and a failed run sends an e-mail so a broken demo is noticed early.
+#
+# Cost: one wake-up per day is about 15 minutes of Render instance time (it sleeps again
+# after 15 minutes idle), roughly 8 of the 750 free hours per month.
+#
+# GitHub disables scheduled workflows of public repositories after 60 days without
+# repository activity. If that happens: Actions tab > "Keep demo alive" > Enable workflow
+# (or `gh workflow enable keep-alive.yml`). Any commit to the repository restarts the clock.
+
+on:
+  schedule:
+    - cron: '23 9 * * *' # 09:23 UTC (06:23 in Brasília); an off-peak minute on purpose
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-demo-alive
+  cancel-in-progress: false
+
+jobs:
+  check-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Wake the backend, log in with the demo account and check the site
+        run: npm run check:demo

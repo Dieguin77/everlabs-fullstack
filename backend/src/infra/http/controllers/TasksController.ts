@@ -3,6 +3,7 @@ import { container } from 'tsyringe';
 import { CreateTaskUseCase } from '@/domain/useCases/CreateTaskUseCase.js';
 import { UpdateTaskUseCase } from '@/domain/useCases/UpdateTaskUseCase.js';
 import { prisma } from '@/infra/database/prisma.js';
+import { toApiComment } from '@/infra/database/mappers/commentMapper.js';
 
 export class TasksController {
   async create(request: Request, response: Response): Promise<Response> {
@@ -120,7 +121,7 @@ export class TasksController {
         },
         comments: {
           include: {
-            user: {
+            author: {
               select: {
                 id: true,
                 name: true
@@ -157,7 +158,7 @@ export class TasksController {
 
     return response.json({
       status: 'success',
-      data: task
+      data: { ...task, comments: task.comments.map((comment) => toApiComment(comment)) }
     });
   }
 

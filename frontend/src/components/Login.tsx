@@ -6,7 +6,7 @@ import './Login.css';
 
 const Login: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { isLoading, error, isWakingServer } = useSelector((state: RootState) => state.auth);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,6 +29,13 @@ const Login: React.FC = () => {
             <div className="error-message">
               {error}
               <button type="button" onClick={() => dispatch(clearError())}>×</button>
+            </div>
+          )}
+
+          {isWakingServer && (
+            <div className="waking-message" role="status" aria-live="polite">
+              ⏳ O servidor gratuito está acordando; pode levar até 1 minuto. Estamos tentando de novo
+              automaticamente, não precisa recarregar a página.
             </div>
           )}
 
@@ -57,7 +64,7 @@ const Login: React.FC = () => {
           </div>
 
           <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? 'Entrando...' : 'Entrar'}
+            {isLoading ? (isWakingServer ? 'Aguardando o servidor...' : 'Entrando...') : 'Entrar'}
           </button>
         </form>
 
