@@ -38,7 +38,9 @@ Senha: demo12345
 npm run check:demo
 ```
 
-O comando termina com código 0 se tudo funciona e 1 se algo falha, e diz qual etapa quebrou. Um workflow do GitHub Actions ([`keep-alive.yml`](.github/workflows/keep-alive.yml)) roda a mesma verificação todos os dias; isso também gera atividade no banco, o que evita a pausa do projeto gratuito do Supabase.
+O `check:demo` termina com código 0 se tudo funciona e 1 se algo falha, e diz qual etapa quebrou. Um workflow do GitHub Actions ([`keep-alive.yml`](.github/workflows/keep-alive.yml)) roda a mesma verificação todos os dias; isso também gera atividade no banco, o que evita a pausa do projeto gratuito do Supabase.
+
+**Popular o quadro da demo** com tarefas de exemplo (usa a API do próprio app, só cria o que falta e nunca duplica): `npm run seed:demo`. Com `-- --dry-run` mostra o plano sem gravar nada, e com `-- --remove` apaga só as tarefas de exemplo.
 
 ---
 
