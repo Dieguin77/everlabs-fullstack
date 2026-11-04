@@ -45,11 +45,6 @@ const SAMPLE_TASKS = [
     description: 'Cobrir criação, atualização de status e permissões de Admin e User com um banco de teste.',
     priority: 5, status: 'TODO', start: 7, end: 25, tags: ['Backend', 'Testes'], comments: [],
   },
-  {
-    name: 'Documentar os endpoints de saúde no Swagger',
-    description: 'Incluir /health e /health/db na documentação interativa em /api-docs (hoje eles só estão descritos no README).',
-    priority: 3, status: 'TODO', start: 3, end: 10, tags: ['Docs'], comments: [],
-  },
   // ---- Em andamento (IN_PROGRESS): nada no momento; a validação a frio já terminou (card abaixo)
   {
     name: 'Validar a partida a frio com a versão nova',
@@ -106,6 +101,20 @@ const SAMPLE_TASKS = [
       'O código consultava o autor do comentário como "user", mas o schema do Prisma o chama de "author". O Prisma rejeitava a consulta e a API devolvia 500.',
     priority: 9, status: 'DONE', start: -1, end: 0, tags: ['Backend'],
     comments: ['Corrigido com um mapeador e coberto por um teste que valida as consultas contra o schema real.'],
+  },
+  {
+    name: 'Documentar os endpoints de saúde no Swagger',
+    description:
+      'Os endpoints /health e /health/db agora aparecem na documentação interativa em /api-docs. O endereço do servidor também deixou de apontar para localhost, então o "Try it out" funciona no site publicado.',
+    priority: 3, status: 'DONE', start: -1, end: 0, tags: ['Docs'],
+    comments: ['Um teste confere que as respostas reais têm exatamente os campos descritos no Swagger.'],
+  },
+  {
+    name: 'Configurar o ESLint do frontend',
+    description:
+      'O npm run lint nunca tinha funcionado porque o repositório não tinha configuração do ESLint. Agora roda com a configuração padrão do Vite + React + TypeScript e passa sem avisos.',
+    priority: 4, status: 'DONE', start: -1, end: 0, tags: ['Frontend'],
+    comments: ['Na primeira execução o lint apontou uma dependência faltando em um useEffect do TaskModal; corrigido sem mudar o comportamento.'],
   },
 ];
 
