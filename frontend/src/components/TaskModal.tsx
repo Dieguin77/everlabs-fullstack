@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import { Task, commentsApi, Comment } from '../services/api';
@@ -19,11 +19,9 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onDelete }) => {
   const canDelete = user?.role === 'ADMIN';
   const canComment = user?.role === 'ADMIN' || task.assigneeId === user?.id;
 
-  useEffect(() => {
-    loadComments();
-  }, [task.id]);
-
-  const loadComments = async () => {
+  // useCallback keeps the same behavior as before (the effect only re-runs when task.id
+  // changes) while declaring the dependency honestly, as react-hooks/exhaustive-deps asks.
+  const loadComments = useCallback(async () => {
     try {
       const response = await commentsApi.listByTask(task.id);
       setComments(response.data);
@@ -32,7 +30,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onDelete }) => {
     } finally {
       setIsLoadingComments(false);
     }
-  };
+  }, [task.id]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
