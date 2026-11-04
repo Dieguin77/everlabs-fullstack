@@ -2,6 +2,20 @@ import { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from '../shared/errors/AppError.js';
 
+// Prisma error codes meaning "the database cannot be reached / answered too slowly".
+const DATABASE_UNAVAILABLE_CODES = ['P1001', 'P1002', 'P1008', 'P1017', 'P2024'];
+
+// Duck-typed on purpose: keeps this middleware free of Prisma imports and easy to unit test.
+function isDatabaseUnavailable(error: Error & { code?: string }): boolean {
+  if (error.name === 'PrismaClientInitializationError') return true;
+
+  return (
+    error.name === 'PrismaClientKnownRequestError' &&
+    typeof error.code === 'string' &&
+    DATABASE_UNAVAILABLE_CODES.includes(error.code)
+  );
+}
+
 export function errorHandler(
   error: Error,
   request: Request,
@@ -24,6 +38,13 @@ export function errorHandler(
       status: 'error',
       message: 'Validation error.',
       issues: error.format(),
+    });
+  }
+
+  if (isDatabaseUnavailable(error)) {
+    return response.status(503).json({
+      status: 'error',
+      message: 'Banco de dados temporariamente indisponível. Tente novamente em instantes.',
     });
   }
 
