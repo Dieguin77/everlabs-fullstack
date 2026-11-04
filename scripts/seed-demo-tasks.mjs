@@ -24,8 +24,8 @@ const REMOVE = process.argv.includes('--remove');
 // Days relative to "today", so the board always looks current.
 const day = (offset) => new Date(Date.now() + offset * 86_400_000).toISOString();
 
-// Real work on this project, so the board tells the truth: what is in the open pull request is
-// "in progress" or "in review", never "done".
+// Real work on this project, so the board tells the truth. Statuses reflect the real state of
+// the project when this was written (04/11/2026): update them here when the project moves on.
 const SAMPLE_TASKS = [
   // ---- A fazer (TODO)
   {
@@ -45,31 +45,23 @@ const SAMPLE_TASKS = [
     description: 'Cobrir criação, atualização de status e permissões de Admin e User com um banco de teste.',
     priority: 5, status: 'TODO', start: 7, end: 25, tags: ['Backend', 'Testes'], comments: [],
   },
+  {
+    name: 'Documentar os endpoints de saúde no Swagger',
+    description: 'Incluir /health e /health/db na documentação interativa em /api-docs (hoje eles só estão descritos no README).',
+    priority: 3, status: 'TODO', start: 3, end: 10, tags: ['Docs'], comments: [],
+  },
   // ---- Em andamento (IN_PROGRESS)
   {
-    name: 'Aviso de "servidor acordando" no login',
+    name: 'Validar a partida a frio com a versão nova',
     description:
-      'O backend gratuito dorme após 15 minutos sem acesso e leva cerca de 1 minuto para acordar. O login avisa o visitante e tenta de novo sozinho, em vez de falhar.',
-    priority: 7, status: 'IN_PROGRESS', start: -2, end: 3, tags: ['Frontend'],
-    comments: ['Aquecimento do /health ao abrir o app e nova tentativa com espera progressiva por até 90 s.'],
-  },
-  {
-    name: 'Respostas 503 claras quando o banco está fora',
-    description: 'Falhar rápido e com mensagem legível quando o banco de dados não responde, em vez de deixar a requisição pendurada.',
-    priority: 8, status: 'IN_PROGRESS', start: -2, end: 3, tags: ['Backend'], comments: [],
+      'Deixar o backend gratuito dormir por mais de 15 minutos e medir o tempo até a primeira resposta de /health e do login (meta: até 90 s a frio e menos de 2 s a quente).',
+    priority: 6, status: 'IN_PROGRESS', start: 0, end: 1, tags: ['DevOps', 'Testes'], comments: [],
   },
   // ---- Em revisão (REVIEW)
   {
-    name: 'Verificação diária da demo (GitHub Actions)',
-    description:
-      'Workflow agendado que acorda o backend, faz login com a conta demo e confere o site. Gera atividade no banco, o que evita a pausa do Supabase gratuito após 7 dias.',
-    priority: 7, status: 'REVIEW', start: -3, end: 1, tags: ['DevOps'],
-    comments: ['Mesma checagem do comando npm run check:demo.'],
-  },
-  {
-    name: 'Documentar a API no Swagger',
-    description: 'Manter o Swagger em /api-docs atualizado com os endpoints de saúde (/health e /health/db).',
-    priority: 3, status: 'REVIEW', start: -4, end: 2, tags: ['Docs'], comments: [],
+    name: 'Atualizar o README com o resultado da verificação',
+    description: 'Registrar a data e o resultado da última verificação manual da demo (npm run check:demo) na seção "Demo ao vivo".',
+    priority: 3, status: 'REVIEW', start: 0, end: 1, tags: ['Docs'], comments: [],
   },
   // ---- Concluído (DONE)
   {
@@ -87,6 +79,32 @@ const SAMPLE_TASKS = [
     name: 'Autenticação JWT com perfis Admin e User',
     description: 'Login com token JWT e autorização por perfil: o Admin gerencia tarefas, o User atualiza as próprias.',
     priority: 9, status: 'DONE', start: -75, end: -60, tags: ['Backend'], comments: [],
+  },
+  {
+    name: 'Aviso de "servidor acordando" no login',
+    description:
+      'O backend gratuito dorme após 15 minutos sem acesso e leva cerca de 1 minuto para acordar. O login avisa o visitante e tenta de novo sozinho, em vez de falhar.',
+    priority: 7, status: 'DONE', start: -3, end: 0, tags: ['Frontend'],
+    comments: ['Aquecimento do /health ao abrir o app e nova tentativa com espera progressiva por até 90 s.'],
+  },
+  {
+    name: 'Respostas 503 claras quando o banco está fora',
+    description: 'Falhar rápido e com mensagem legível quando o banco de dados não responde, em vez de deixar a requisição pendurada.',
+    priority: 8, status: 'DONE', start: -3, end: 0, tags: ['Backend'], comments: [],
+  },
+  {
+    name: 'Verificação diária da demo (GitHub Actions)',
+    description:
+      'Workflow agendado que acorda o backend, faz login com a conta demo e confere o site. Gera atividade no banco, o que evita a pausa do Supabase gratuito após 7 dias.',
+    priority: 7, status: 'DONE', start: -3, end: 0, tags: ['DevOps'],
+    comments: ['Mesma checagem do comando npm run check:demo.'],
+  },
+  {
+    name: 'Corrigir erro 500 ao abrir tarefa e ao listar comentários',
+    description:
+      'O código consultava o autor do comentário como "user", mas o schema do Prisma o chama de "author". O Prisma rejeitava a consulta e a API devolvia 500.',
+    priority: 9, status: 'DONE', start: -1, end: 0, tags: ['Backend'],
+    comments: ['Corrigido com um mapeador e coberto por um teste que valida as consultas contra o schema real.'],
   },
 ];
 
