@@ -2,6 +2,7 @@ import { ITask } from '@/domain/entities/interfaces.js';
 import { TaskStatus } from '@/domain/entities/types.js';
 import { ICreateTaskDTO, ITasksRepository, IUpdateTaskDTO } from '@/domain/repositories/ITasksRepository.js';
 import { prisma } from '../prisma.js';
+import { toApiComment } from '../mappers/commentMapper.js';
 
 export class PrismaTasksRepository implements ITasksRepository {
   async create(data: ICreateTaskDTO): Promise<ITask> {
@@ -19,7 +20,7 @@ export class PrismaTasksRepository implements ITasksRepository {
   }
 
   async findById(id: number): Promise<ITask | null> {
-    return prisma.task.findUnique({
+    const task = await prisma.task.findUnique({
       where: { id },
       include: {
         assignee: {
@@ -31,7 +32,7 @@ export class PrismaTasksRepository implements ITasksRepository {
         },
         comments: {
           include: {
-            user: {
+            author: {
               select: {
                 id: true,
                 name: true
@@ -47,6 +48,12 @@ export class PrismaTasksRepository implements ITasksRepository {
         files: true
       }
     });
+
+    if (!task) return null;
+
+    const result = { ...task, comments: task.comments.map((comment) => toApiComment(comment)) };
+
+    return result;
   }
 
   async findByAssignee(assigneeId: number): Promise<ITask[]> {
