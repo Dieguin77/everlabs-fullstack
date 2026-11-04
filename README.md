@@ -30,7 +30,7 @@ Senha: demo12345
 
 [![Verificação diária da demo](https://github.com/Dieguin77/everlabs-fullstack/actions/workflows/keep-alive.yml/badge.svg)](https://github.com/Dieguin77/everlabs-fullstack/actions/workflows/keep-alive.yml)
 
-**Última verificação manual:** 04/11/2026 — ❌ backend sem resposta (banco do Supabase inativo); frontend no ar. Atualize esta linha depois de restaurar o banco e rodar o comando abaixo.
+**Última verificação manual:** 04/11/2026 — ✅ `npm run check:demo` passou (7 de 7). Partida a frio medida: `/health` respondeu em ~12 s depois de 17 min sem acesso, e em menos de 1 s com o servidor acordado. Atualize esta linha quando verificar de novo.
 
 **Verificar a demo de ponta a ponta** (acorda o backend, testa o banco, faz login com a conta demo e confere o site; precisa de Node 18+, sem instalar nada):
 
@@ -253,7 +253,7 @@ Comece por `npm run check:demo`: ele mostra qual etapa falha.
 | Logs com `P1001` ou `tenant/user not found` | O Prisma não alcança o banco (projeto pausado ou removido, ou URL errada) | Mesma correção da linha do banco. |
 | Login devolve `401` | A conta demo não existe no banco | O seed roda em segundo plano a cada inicialização; reinicie o serviço ou rode `npx prisma db seed` com a `DIRECT_URL` correta. |
 
-**Caso de 04/11/2026.** O backend parou de responder: o domínio do projeto Supabase não resolvia e o pooler devolvia `tenant/user not found` (compatível com projeto pausado por inatividade). Como o contêiner rodava `prisma migrate deploy` antes de iniciar o servidor, a porta nunca abria e toda requisição ficava sem resposta. Agora o servidor abre a porta imediatamente e roda migrations e seed em segundo plano; com o banco fora, a API responde `503` com mensagem clara em poucos segundos em vez de travar.
+**Caso de 04/11/2026.** O backend parou de responder: o domínio do projeto Supabase não resolvia e o pooler devolvia `tenant/user not found` (o painel confirmou: projeto pausado por inatividade; bastou retomá-lo em **Resume project**, e os dados estavam intactos). Como o contêiner rodava `prisma migrate deploy` antes de iniciar o servidor, a porta nunca abria e toda requisição ficava sem resposta. Agora o servidor abre a porta imediatamente e roda migrations e seed em segundo plano; com o banco fora, a API responde `503` com mensagem clara em poucos segundos em vez de travar.
 
 **Prevenção.** O workflow diário `keep-alive.yml` gera atividade no banco. O GitHub desativa workflows agendados de repositórios públicos após 60 dias sem atividade no repositório: se isso acontecer, ative-o de novo em **Actions → Keep demo alive → Enable workflow** (ou `gh workflow enable keep-alive.yml`). Qualquer commit reinicia a contagem.
 
