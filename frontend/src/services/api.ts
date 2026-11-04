@@ -1,9 +1,42 @@
+import { retryWhileWakingUp } from './wakeRetry';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api';
 
 interface RequestOptions {
   method?: string;
   body?: unknown;
   headers?: Record<string, string>;
+  /** Aborts the request after this long. Without it the browser decides. */
+  timeoutMs?: number;
+}
+
+/** status 0 means the server could not be reached (network error or timeout). */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+// A sleeping free-tier backend shows up as a network error, a timeout or a 502/503/504.
+function isTransientError(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 0 || [408, 502, 503, 504].includes(error.status));
+}
+
+/**
+ * Fire-and-forget request to /health so a sleeping backend starts waking up while the
+ * visitor is still looking at the login screen. Never blocks the UI and never throws.
+ */
+export function warmUpBackend(): void {
+  try {
+    const healthUrl = new URL('/health', API_URL).toString();
+    fetch(healthUrl, { cache: 'no-store' }).catch(() => undefined);
+  } catch {
+    // API_URL is not an absolute URL: nothing to warm up.
+  }
 }
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -18,28 +51,61 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method: options.method || 'GET',
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  const controller = new AbortController();
+  const timer = options.timeoutMs ? setTimeout(() => controller.abort(), options.timeoutMs) : undefined;
 
-  const data = await response.json();
+  try {
+    let response: Response;
 
-  if (!response.ok) {
-    throw new Error(data.message || 'Something went wrong');
+    try {
+      response = await fetch(`${API_URL}${endpoint}`, {
+        method: options.method || 'GET',
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+        signal: controller.signal,
+      });
+    } catch {
+      throw new ApiError('Não foi possível conectar ao servidor.', 0);
+    }
+
+    // Error pages from the host (502/503) are not JSON, so parsing must not throw.
+    const data = await response.json().catch(() => null);
+
+    if (controller.signal.aborted) {
+      throw new ApiError('O servidor demorou demais para responder.', 0);
+    }
+
+    if (!response.ok) {
+      throw new ApiError(
+        data?.message || (response.status >= 500 ? 'Servidor indisponível no momento.' : 'Something went wrong'),
+        response.status,
+      );
+    }
+
+    if (data === null) {
+      throw new ApiError('Resposta inválida do servidor.', response.status);
+    }
+
+    return data;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
-
-  return data;
 }
 
 // Auth API
 export const authApi = {
-  login: (email: string, password: string) =>
-    request<{ data: { user: User; token: string } }>('/users/authenticate', {
-      method: 'POST',
-      body: { email, password },
-    }),
+  // Retries while a sleeping free-tier backend wakes up (up to ~90 s in total), but fails
+  // right away for real answers such as "wrong password" (4xx).
+  login: (email: string, password: string, options: { onWaking?: () => void } = {}) =>
+    retryWhileWakingUp(
+      (timeoutMs) =>
+        request<{ data: { user: User; token: string } }>('/users/authenticate', {
+          method: 'POST',
+          body: { email, password },
+          timeoutMs,
+        }),
+      { onWaking: options.onWaking, isRetryable: isTransientError },
+    ),
   
   register: (name: string, email: string, password: string, role?: string) =>
     request<{ data: User }>('/users', {

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
 import { authApi, User } from '../../services/api';
 
 interface AuthState {
@@ -7,6 +7,8 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  /** True while the (free-tier) backend seems to be waking up and login is being retried. */
+  isWakingServer: boolean;
 }
 
 const initialState: AuthState = {
@@ -15,13 +17,18 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: !!localStorage.getItem('token'),
+  isWakingServer: false,
 };
+
+const wakingServerDetected = createAction('auth/wakingServerDetected');
 
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+  async ({ email, password }: { email: string; password: string }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await authApi.login(email, password);
+      const response = await authApi.login(email, password, {
+        onWaking: () => dispatch(wakingServerDetected()),
+      });
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
@@ -62,16 +69,22 @@ export const authSlice = createSlice({
       // Login
       .addCase(login.pending, (state) => {
         state.isLoading = true;
+        state.isWakingServer = false;
         state.error = null;
+      })
+      .addCase(wakingServerDetected, (state) => {
+        state.isWakingServer = true;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isWakingServer = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
+        state.isWakingServer = false;
         state.error = action.payload as string;
       })
       // Get Profile
