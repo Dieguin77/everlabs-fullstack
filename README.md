@@ -303,6 +303,10 @@ curl -X POST http://localhost:3333/api/users \
 
 **PostgreSQL** — Usado tanto localmente (via Docker Compose) quanto em produção, para manter paridade entre ambientes. A Clean Architecture torna a troca de banco (ex.: MySQL) uma mudança isolada na camada de repositório.
 
+## Licença
+
+MIT. Veja o arquivo [LICENSE](LICENSE).
+
 ---
 
 <div align="center">
